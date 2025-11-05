@@ -68,5 +68,13 @@ const deleteComment = async (req, res) => {
   }
 };
 
+const createComment = async (req, res) => {
+  try {
+    res.status(200).json({ message: 'Comentário criado com sucesso (placeholder)' });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao criar comentário' });
+  }
+};
+
 module.exports = { createComment, getCommentsByPost, deleteComment };
 

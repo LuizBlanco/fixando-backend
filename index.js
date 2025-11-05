@@ -4,7 +4,7 @@ const dotenv = require ('dotenv');
 const { swaggerDocs } = require("./src/swagger");
 const postRoutes = require('./src/routes/posts');
 const userRoutes = require('./src/routes/userRoutes');
-const commentRoutes = require('./src/routes/comment');
+const commentRoutes = require('./src/routes/comments');
 
 
 dotenv.config();
@@ -15,7 +15,7 @@ app.use(cors());
 app.use(express.json());
 app.use('/api/posts', postRoutes);
 app.use("/api/users", userRoutes);
-app.use('/api/posts', commentRoutes);
+app.use('/api/comments', commentRoutes);
 
 const authRoutes = require ('./src/routes/auth');
 app.use('/api/auth', authRoutes);
