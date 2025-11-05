@@ -21,12 +21,13 @@ model Post {
   id        Int       @id @default(autoincrement())
   title     String
   content   String
-  author    User      @relation(fields: [authorId], references: [id])
   authorId  Int
+  author    User      @relation(fields: [authorId], references: [id])
   comments  Comment[]
-  createdAt DateTime  @default(now())
   postTags  PostTag[]
+  createdAt DateTime  @default(now())
 }
+
 
 model Comment {
   id        Int       @id @default(autoincrement())
