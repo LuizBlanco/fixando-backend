@@ -4,6 +4,7 @@ const dotenv = require ('dotenv');
 const { swaggerDocs } = require("./src/swagger");
 const postRoutes = require('./src/routes/posts');
 const userRoutes = require('./src/routes/userRoutes');
+const commentRoutes = require('./src/routes/comment');
 
 
 dotenv.config();
@@ -14,6 +15,7 @@ app.use(cors());
 app.use(express.json());
 app.use('/api/posts', postRoutes);
 app.use("/api/users", userRoutes);
+app.use('/api/posts', commentRoutes);
 
 const authRoutes = require ('./src/routes/auth');
 app.use('/api/auth', authRoutes);
@@ -29,5 +31,9 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
 
+});
+
+app.get('/test', (req, res) => {
+  res.send('Servidor funcionando!');
 });
 
