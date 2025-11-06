@@ -107,9 +107,61 @@ const updateUser = async (req, res) => {
         error: err.message, 
         stack: err.stack 
     });
-}
+  }
+};
 
+const getAllUser = async (req, res) => {
+  try {
+    // Aqui você buscaria no banco de dados
+    // Exemplo com dados mock
+    const users = [
+      { id: 1, name: 'Lucas', email: 'lucas@example.com' },
+      { id: 2, name: 'Ana', email: 'ana@example.com' }
+    ];
+
+    // Verifica se encontrou usuários
+    if (!users || users.length === 0) {
+      return res.status(404).json({ message: 'Nenhum usuário encontrado' });
+    }
+
+    // Retorna a lista de usuários
+    res.status(200).json(users);
+
+  } catch (error) {
+    console.error('Erro ao buscar usuários:', error);
+    res.status(500).json({ message: 'Erro interno ao buscar usuários' });
+  }
+};
+
+const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Validação simples do ID
+    if (!id) {
+      return res.status(400).json({ message: 'ID do usuário é obrigatório' });
+    }
+
+    // Aqui você faria a lógica de deletar do banco
+    // Exemplo sem banco:
+    const userExists = true; // substitua pela checagem real no DB
+
+    if (!userExists) {
+      return res.status(404).json({ message: `Usuário com ID ${id} não encontrado` });
+    }
+
+    // Simula a exclusão
+    // await prisma.user.delete({ where: { id: Number(id) } }); // se estiver usando Prisma
+
+    res.status(200).json({ message: `Usuário ${id} deletado com sucesso` });
+
+  } catch (error) {
+    console.error('Erro ao deletar usuário:', error);
+    res.status(500).json({ message: 'Erro interno ao deletar usuário' });
+  }
 };
 
 
-module.exports = { getUsers, createUser, getUserById, updateUser};
+
+
+module.exports = { getUsers, createUser, getUserById, updateUser, deleteUser, getAllUser};

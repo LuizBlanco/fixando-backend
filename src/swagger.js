@@ -1,29 +1,29 @@
-
-const swaggerJSDoc = require ("swagger-jsdoc");
-const swaggerUi = require ("swagger-ui-express");
+const swaggerJsDoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 
 const swaggerOptions = {
-    definition: {
-        openapi: "3.0.0", 
-        info: {
-            title: "Fixando PC API",
-            version: "1.0.0",
-            description: "API do forum FIXANDOPC",
-        },
-        servers: [
-            {
-                url: "http://localhost:3000",
-            },
-        ],
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'FixandoPC API',
+      version: '1.0.0',
+      description: 'API do fórum FixandoPC — compartilhamento de dúvidas e soluções sobre manutenção de computadores.',
     },
-    apis: ["./src/routes/*.js"],
+    servers: [
+      {
+        url: 'http://localhost:3000',
+        description: 'Servidor local',
+      },
+    ],
+  },
+  apis: ['./src/routes/*.js', './src/controllers/*.js'], // Apenas uma linha
 };
 
-const swaggerSpec = swaggerJSDoc(swaggerOptions);
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
 
-function swaggerDocs(app) {
-    app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-    console.log("Swagger rodando em http://localhost:3000/api-docs");
+function setupSwagger(app) {
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+  console.log('Swagger rodando em http://localhost:3000/api-docs');
 }
 
-module.exports = {swaggerDocs};
+module.exports = { setupSwagger };

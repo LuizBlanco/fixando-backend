@@ -1,11 +1,8 @@
-const express = require ('express');
-const cors = require ('cors');
-const dotenv = require ('dotenv');
-const { swaggerDocs } = require("./src/swagger");
-const postRoutes = require('./src/routes/posts');
-const userRoutes = require('./src/routes/userRoutes');
-const commentRoutes = require('./src/routes/comments');
-
+const dotenv = require("dotenv");
+const express = require('express');
+const cors = require('cors');
+const { setupSwagger } = require('./src/swagger');
+const routes = require('./src'); // rotas centralizadas
 
 dotenv.config();
 
@@ -13,27 +10,22 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use('/api/posts', postRoutes);
-app.use("/api/users", userRoutes);
-app.use('/api/comments', commentRoutes);
 
-const authRoutes = require ('./src/routes/auth');
-app.use('/api/auth', authRoutes);
+// usa todas as rotas que vierem de src/routes
+app.use('/api', routes);
 
-swaggerDocs(app);
+// swagger
+setupSwagger(app);
 
+// middleware de erro genérico
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ message: 'Erro interno do servidor'});
+  console.error(err.stack);
+  res.status(500).json({ message: 'Erro interno do servidor' });
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
-
+  console.log(`Servidor rodando na porta ${PORT}`);
 });
 
-app.get('/test', (req, res) => {
-  res.send('Servidor funcionando!');
-});
 
