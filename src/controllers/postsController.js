@@ -1,3 +1,4 @@
+
 const prisma = require('../prisma/client');
 
 const createPost = async (req, res) => {
@@ -47,19 +48,18 @@ const getPosts = async (req, res) => {
 const getPostById = async (req, res) => {
   try {
     const { id } = req.params;
+    const postId = parseInt(id);
+
+    if (isNaN(postId)) {
+      return res.status(400).json({ message: 'ID inválido' });
+    }
 
     const post = await prisma.post.findUnique({
-      where: { id: parseInt(id) },
+      where: { id: postId },
       include: {
         author: { select: { id: true, name: true, email: true } },
-        comments: {
-          include: {
-            author: { select: { id: true, name: true } },
-          },
-        },
-        postTags: {
-          include: { tag: true },
-        },
+        comments: { include: { author: { select: { id: true, name: true } } } },
+        postTags: { include: { tag: true } },
       },
     });
 
@@ -97,4 +97,66 @@ const deletePost = async (req, res) => {
   }
 };
 
-module.exports = { createPost, getPosts, getPostById, deletePost };
+const updatePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, content } = req.body;
+    const postId = parseInt(id);
+
+    if (isNaN(postId)) {
+      return res.status(400).json({ message: 'ID inválido' });
+    }
+
+    const post = await prisma.post.findUnique({ where: { id: postId } });
+    if (!post) return res.status(404).json({ message: 'Post não encontrado' });
+
+    if (post.authorId !== req.user.id) {
+      return res.status(403).json({ message: 'Você não pode editar este post' });
+    }
+
+    const updatedPost = await prisma.post.update({
+      where: { id: postId },
+      data: { title, content },
+    });
+
+    res.json(updatedPost);
+  } catch (err) {
+    console.error('Erro ao atualizar post:', err);
+    res.status(500).json({ message: 'Erro ao atualizar post', error: err.message });
+  }
+};
+
+const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, email } = req.body || {};
+    const userId = Number(id);
+
+    if (!userId) {
+      return res.status(400).json({ message: 'ID inválido' });
+    }
+
+    if (!name && !email) {
+      return res.status(400).json({ message: 'Nenhum dado para atualizar' });
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { name, email },
+      select: { id: true, name: true, email: true, createdAt: true }
+    });
+
+    res.json(updatedUser);
+  } catch (err) {
+    console.error('Erro ao atualizar usuário:', err);
+
+    if (err.code === 'P2025') {
+      return res.status(404).json({ message: 'Usuário não encontrado' });
+    }
+
+    res.status(500).json({ message: 'Erro no servidor', error: err.message });
+  }
+};
+
+
+module.exports = { createPost, getPosts, getPostById, deletePost, updatePost, updateUser };
