@@ -3,20 +3,27 @@ const prisma = require('../prisma/client');
 
 const createPost = async (req, res) => {
   try {
+    // DEBUG: veja o que o Multer recebeu
+    console.log("req.body:", req.body);
+    console.log("req.file:", req.file);
+
     const { title, content } = req.body;
+    const userId = req.user.id; // vem do token
+    const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
     const post = await prisma.post.create({
       data: {
         title,
         content,
-        authorId: req.user.id,
+        imageUrl,
+        authorId: userId,
       },
     });
 
-    res.status(201).json(post);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Erro ao criar post' });
+    res.status(201).json({ message: 'Post criado com sucesso!', post });
+  } catch (error) {
+    console.error("Erro ao criar post:", error);
+    res.status(500).json({ error: "Erro ao criar post" });
   }
 };
 

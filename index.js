@@ -1,35 +1,46 @@
-const dotenv = require("dotenv");
 const express = require('express');
 const cors = require('cors');
+const dotenv = require('dotenv');
 const { setupSwagger } = require('./src/swagger');
-const routes = require('./src'); // rotas centralizadas
+
+// Importa as rotas centralizadas
+const routes = require('./src');
 const commentRoutes = require('./src/routes/comments');
-
-
 
 dotenv.config();
 
 const app = express();
-app.use(express.json());
-app.use('/api/posts', commentRoutes);
+
+// Middlewares globais
 app.use(cors());
+app.use(express.json());
 
+// Rotas específicas
+app.use('/api/posts', commentRoutes);
 
-// usa todas as rotas que vierem de src/routes
+// Rotas gerais centralizadas
 app.use('/api', routes);
 
-// swagger
+// index.js na raiz do projeto
+app.use('/likes', require('./src/routes/likes'));
+
+app.use('/uploads', express.static('uploads'));
+app.use('/upload', require('./src/routes/upload'));
+
+
+
+
+// Configuração do Swagger
 setupSwagger(app);
 
-// middleware de erro genérico
+// Middleware de erro genérico
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error('Erro interno:', err.stack);
   res.status(500).json({ message: 'Erro interno do servidor' });
 });
 
+// Inicializa o servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+  console.log(` Servidor rodando na porta ${PORT}`);
 });
-
-

@@ -7,7 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
   id        Int       @id @default(autoincrement())
   name      String
@@ -15,6 +14,7 @@ model User {
   password  String
   posts     Post[]
   comments  Comment[]
+  likes     Like[]
   createdAt DateTime  @default(now())
 }
 
@@ -22,22 +22,36 @@ model Post {
   id        Int       @id @default(autoincrement())
   title     String
   content   String
+  image     String?   // <-- adiciona esta linha
   authorId  Int
   author    User      @relation(fields: [authorId], references: [id])
   comments  Comment[]
   postTags  PostTag[]
+  likes     Like[]
   createdAt DateTime  @default(now())
 }
 
-
 model Comment {
-  id        Int       @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   content   String
-  post      Post      @relation(fields: [postId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id])
   postId    Int
-  author    User      @relation(fields: [authorId], references: [id])
+  author    User     @relation(fields: [authorId], references: [id])
   authorId  Int
-  createdAt DateTime  @default(now())
+  createdAt DateTime @default(now())
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  postId    Int
+  isLike    Boolean // true = like, false = dislike
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id])
+
+  @@unique([userId, postId])
 }
 
 model Tag {
@@ -47,11 +61,10 @@ model Tag {
 }
 
 model PostTag {
-  
-  postId Int 
-  tagId Int 
-  post Post @relation(fields: [postId], references: [id])
-  tag Tag @relation(fields: [tagId], references: [id])
+  postId Int
+  tagId  Int
+  post   Post @relation(fields: [postId], references: [id])
+  tag    Tag  @relation(fields: [tagId], references: [id])
 
   @@id([postId, tagId])
 }

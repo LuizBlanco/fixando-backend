@@ -42,11 +42,11 @@ const createUser = async (req, res) => {
 const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = Number(id);
+    const userId = parseInt(req.params.id, 10);
+if (isNaN(userId) || userId <= 0) {
+    return res.status(400).json({ message: 'ID inválido' });
+}
 
-    if (!userId) {
-      return res.status(400).json({ message: 'ID inválido' });
-    }
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -69,10 +69,11 @@ const getUserById = async (req, res) => {
 
 const updateUser = async (req, res) => {
   try {
-    const userId = Number(req.params.id); // ID do usuário que você quer atualizar
-    const { name, email } = req.body;     
+    const userId = parseInt(req.params.id, 10);
+if (isNaN(userId) || userId <= 0) {
+    return res.status(400).json({ message: 'ID inválido' });
+}
 
-    if (!userId) return res.status(400).json({ message: 'ID inválido' });
 
     // O usuário logado deve ser o mesmo do ID
     if (req.user.id !== userId) {
@@ -161,7 +162,52 @@ const deleteUser = async (req, res) => {
   }
 };
 
+const getProfile = async (req, res) => {
+  try {
+    const userId = req.user?.id; // pega do token
+    if (!userId) return res.status(400).json({ message: 'ID inválido' });
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, name: true, email: true, createdAt: true }
+    });
+
+    if (!user) return res.status(404).json({ message: 'Usuário não encontrado' });
+
+    res.json(user);
+  } catch (err) {
+    console.error('Erro getProfile:', err);
+    res.status(500).json({ message: 'Erro no servidor', error: err.message });
+  }
+};
+
+// Atualizar perfil
+const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.id; // ✅ pega o ID do token
+    const { name, email, password } = req.body;
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        name,
+        email,
+        password: password ? await bcrypt.hash(password, 10) : undefined,
+      },
+    });
+
+    res.json({
+      message: "Perfil atualizado com sucesso!",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: "Erro ao atualizar perfil" });
+  }
+};
 
 
 
-module.exports = { getUsers, createUser, getUserById, updateUser, deleteUser, getAllUser};
+
+
+module.exports = { getUsers, createUser, getUserById, updateUser, deleteUser, getAllUser, updateProfile, getProfile};

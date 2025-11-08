@@ -1,18 +1,22 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
+const authenticate = require("../middlewares/authenticate");
+
 const {
   getAllUser,
-  getUserById,
   createUser,
+  getUserById,
   updateUser,
-  deleteUser
-} = require('../controllers/userController');
+  deleteUser,
+  getProfile,
+  updateProfile,
+} = require("../controllers/userController");
 
 /**
  * @swagger
  * tags:
  *   name: Users
- *   description: Rotas para gerenciamento de usuários
+ *   description: Endpoints relacionados aos usuários
  */
 
 /**
@@ -23,46 +27,9 @@ const {
  *     tags: [Users]
  *     responses:
  *       200:
- *         description: Lista de usuários
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: integer
- *                   name:
- *                     type: string
- *                   email:
- *                     type: string
- *                   createdAt:
- *                     type: string
- *                     format: date-time
+ *         description: Lista de usuários retornada com sucesso
  */
-router.get('/', getAllUser);
-
-/**
- * @swagger
- * /api/users/{id}:
- *   get:
- *     summary: Retorna um usuário pelo ID
- *     tags: [Users]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: ID do usuário
- *     responses:
- *       200:
- *         description: Usuário encontrado
- *       404:
- *         description: Usuário não encontrado
- */
-router.get('/:id', getUserById);
+router.get("/", getAllUser);
 
 /**
  * @swagger
@@ -90,24 +57,33 @@ router.get('/:id', getUserById);
  *     responses:
  *       201:
  *         description: Usuário criado com sucesso
- *       500:
- *         description: Erro ao criar usuário
  */
-router.post('/', createUser);
+router.post("/", createUser);
 
 /**
  * @swagger
- * /api/users/{id}:
- *   put:
- *     summary: Atualiza um usuário existente
+ * /api/users/me:
+ *   get:
+ *     summary: Retorna os dados do usuário autenticado
  *     tags: [Users]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: ID do usuário a ser atualizado
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Dados do usuário retornados com sucesso
+ *       401:
+ *         description: Token inválido ou ausente
+ */
+router.get("/me", authenticate, getProfile);
+
+/**
+ * @swagger
+ * /api/users/me:
+ *   put:
+ *     summary: Atualiza os dados do usuário autenticado
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -119,17 +95,75 @@ router.post('/', createUser);
  *                 type: string
  *               email:
  *                 type: string
+ *               password:
+ *                 type: string
  *     responses:
  *       200:
- *         description: Usuário atualizado com sucesso
+ *         description: Dados atualizados com sucesso
  *       400:
- *         description: ID inválido ou email já existente
- *       403:
- *         description: Usuário não autorizado
+ *         description: Erro ao atualizar perfil
+ *       401:
+ *         description: Token inválido ou ausente
+ */
+router.put("/me", authenticate, updateProfile);
+
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   get:
+ *     summary: Busca um usuário pelo ID
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID do usuário
+ *     responses:
+ *       200:
+ *         description: Usuário encontrado
  *       404:
  *         description: Usuário não encontrado
  */
-router.put('/:id', updateUser);
+router.get("/:id", getUserById);
+
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   put:
+ *     summary: Atualiza um usuário pelo ID
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Usuário atualizado
+ *       401:
+ *         description: Token inválido
+ *       404:
+ *         description: Usuário não encontrado
+ */
+router.put("/:id", authenticate, updateUser);
 
 /**
  * @swagger
@@ -137,19 +171,22 @@ router.put('/:id', updateUser);
  *   delete:
  *     summary: Deleta um usuário pelo ID
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
+ *         required: true
  *         schema:
  *           type: integer
- *         required: true
- *         description: ID do usuário a ser deletado
  *     responses:
  *       200:
  *         description: Usuário deletado com sucesso
+ *       401:
+ *         description: Token inválido
  *       404:
  *         description: Usuário não encontrado
  */
-router.delete('/:id', deleteUser);
+router.delete("/:id", authenticate, deleteUser);
 
 module.exports = router;
