@@ -5,7 +5,7 @@ const createPost = async (req, res) => {
   try {
     // DEBUG: veja o que o Multer recebeu
     console.log("req.body:", req.body);
-    console.log("req.file:", req.file);
+    console.log("req.file:", req.file.filename);
 
     const { title, content } = req.body;
     const userId = req.user.id; // vem do token
@@ -15,7 +15,7 @@ const createPost = async (req, res) => {
       data: {
         title,
         content,
-        imageUrl,
+        image: imageUrl,
         authorId: userId,
       },
     });
@@ -23,7 +23,7 @@ const createPost = async (req, res) => {
     res.status(201).json({ message: 'Post criado com sucesso!', post });
   } catch (error) {
     console.error("Erro ao criar post:", error);
-    res.status(500).json({ error: "Erro ao criar post" });
+    res.status(500).json({ error: 'Erro ao criar post' });
   }
 };
 

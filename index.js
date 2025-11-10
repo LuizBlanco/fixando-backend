@@ -25,7 +25,7 @@ app.use('/api', routes);
 app.use('/likes', require('./src/routes/likes'));
 
 app.use('/uploads', express.static('uploads'));
-app.use('/upload', require('./src/routes/upload'));
+
 
 
 
@@ -36,7 +36,7 @@ setupSwagger(app);
 // Middleware de erro genérico
 app.use((err, req, res, next) => {
   console.error('Erro interno:', err.stack);
-  res.status(500).json({ message: 'Erro interno do servidor' });
+  res.status(500).json({ message: ' Erro interno do servidor' });
 });
 
 // Inicializa o servidor
