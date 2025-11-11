@@ -7,19 +7,30 @@ const swaggerOptions = {
     info: {
       title: 'FixandoPC API',
       version: '1.0.0',
-      description: 'API do fórum FixandoPC — compartilhamento de dúvidas e soluções sobre manutenção de computadores.',
+      description: 'API do fórum FixandoPC — compartilhamento e interação entre usuários',
     },
-    servers: [
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
+    security: [
       {
-        url: 'http://localhost:3000',
-        description: 'Servidor local',
+        bearerAuth: [],
       },
     ],
   },
-  apis: ['./src/routes/*.js', './src/controllers/*.js'], // Apenas uma linha
+   apis: ['./src/routes/*.js', './src/controllers/*.js'],
 };
 
+
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
+
+
 
 function setupSwagger(app) {
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));

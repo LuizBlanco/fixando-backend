@@ -31,24 +31,36 @@ const getPosts = async (req, res) => {
   try {
     const posts = await prisma.post.findMany({
       include: {
-        author: true,
+        author: {
+          select: { id: true, name: true, email: true },
+        },
         comments: true,
+        likes: true,
         postTags: {
           include: { tag: true },
         },
       },
+      orderBy: {
+        createdAt: "desc", // posts mais novos primeiro
+      },
     });
 
-    const postsWithTags = posts.map(post => ({
-      ...post,
-      tags: post.postTags.map(pt => pt.tag.name),
-      postTags: undefined,
+    const formattedPosts = posts.map((post) => ({
+      id: post.id,
+      title: post.title,
+      content: post.content,
+      image: post.image,
+      createdAt: post.createdAt,
+      author: post.author,
+      tags: post.postTags.map((pt) => pt.tag.name),
+      likeCount: post.likes.length,
+      commentCount: post.comments.length,
     }));
 
-    res.json(postsWithTags);
+    res.json(formattedPosts);
   } catch (err) {
     console.error("Erro ao listar posts:", err);
-    res.status(500).json({ message: "Erro ao listar o post", error: err.message });
+    res.status(500).json({ message: "Erro ao listar posts", error: err.message });
   }
 };
 
@@ -84,6 +96,81 @@ const getPostById = async (req, res) => {
     res.status(500).json({ message: 'Erro ao buscar post', error: err.message });
   }
 };
+
+const getPostsByUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = parseInt(id);
+
+    if (isNaN(userId)) {
+      return res.status(400).json({ message: 'ID inválido' });
+    }
+
+    const posts = await prisma.post.findMany({
+      where: { authorId: userId },
+      include: {
+        author: {
+          select: { id: true, name: true, email: true },
+        },
+        comments: true,
+        likes: true,
+        postTags: { include: { tag: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const formatted = posts.map((post) => ({
+      id: post.id,
+      title: post.title,
+      content: post.content,
+      image: post.image,
+      createdAt: post.createdAt,
+      author: post.author,
+      tags: post.postTags.map((pt) => pt.tag.name),
+      likeCount: post.likes.length,
+      commentCount: post.comments.length,
+    }));
+
+    res.json(formatted);
+  } catch (err) {
+    console.error("Erro ao buscar posts do usuário:", err);
+    res.status(500).json({ message: "Erro ao buscar posts do usuário", error: err.message });
+  }
+};
+
+const getPostStats = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const postId = parseInt(id);
+
+    if (isNaN(postId)) {
+      return res.status(400).json({ message: 'ID inválido' });
+    }
+
+    // Verifica se o post existe
+    const post = await prisma.post.findUnique({ where: { id: postId } });
+    if (!post) {
+      return res.status(404).json({ message: 'Post não encontrado' });
+    }
+
+    // Conta likes e comentários
+    const [likeCount, commentCount] = await Promise.all([
+      prisma.like.count({ where: { postId } }),
+      prisma.comment.count({ where: { postId } }),
+    ]);
+
+    res.json({
+      postId,
+      likeCount,
+      commentCount,
+    });
+  } catch (err) {
+    console.error('Erro ao buscar estatísticas do post:', err);
+    res.status(500).json({ message: 'Erro ao buscar estatísticas do post', error: err.message });
+  }
+};
+
+
 
 const deletePost = async (req, res) => {
   try {
@@ -166,4 +253,4 @@ const updateUser = async (req, res) => {
 };
 
 
-module.exports = { createPost, getPosts, getPostById, deletePost, updatePost, updateUser };
+module.exports = { createPost, getPosts, getPostById, deletePost, updatePost, updateUser,  getPostsByUser, getPostStats };

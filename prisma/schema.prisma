@@ -51,7 +51,7 @@ model Like {
   user User @relation(fields: [userId], references: [id])
   post Post @relation(fields: [postId], references: [id])
 
-  @@unique([userId, postId])
+ @@unique([userId, postId], name: "userId_postId")
 }
 
 model Tag {
@@ -59,6 +59,14 @@ model Tag {
   name     String    @unique
   postTags PostTag[]
 }
+
+model RevokedToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  revokedAt DateTime @default(now())
+  expiresAt DateTime
+}
+
 
 model PostTag {
   postId Int
