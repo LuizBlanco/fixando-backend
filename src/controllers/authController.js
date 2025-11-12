@@ -4,32 +4,40 @@ const prisma = require('../prisma/client');
 
 const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    // mapa: aceita tanto 'name' quanto 'username' vindo do front
+    const { username, name, email, password } = req.body;
+    const finalName = name || username;
 
-    
+    // validação básica
+    if (!finalName || !email || !password) {
+      return res.status(400).json({ message: "Campos obrigatórios ausentes: name/email/password" });
+    }
+
+    // verifica se já existe
     const userExists = await prisma.user.findUnique({ where: { email } });
     if (userExists) {
       return res.status(400).json({ message: "Usuário já existe" });
     }
 
-
+    // hash da senha e criação
     const hashedPassword = await bcrypt.hash(password, 10);
-
 
     await prisma.user.create({
       data: {
-        name,
+        name: finalName,
         email,
         password: hashedPassword,
       },
     });
 
-    res.status(201).json({ message: "Usuário registrado com sucesso!" });
+    return res.status(201).json({ message: "Usuário registrado com sucesso!" });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Erro interno no servidor" });
+    console.error("Erro no register:", error);
+    // envia mensagem de erro mais útil para logs; em produção não vaza detalhes sensíveis
+    return res.status(500).json({ message: "Erro interno no servidor" });
   }
 };
+
 
   const login = async (req, res) => {
   try {

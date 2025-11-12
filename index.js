@@ -12,13 +12,14 @@ dotenv.config();
 const app = express();
 
 // Middlewares globais
+app.use(express.json());
 app.use(
   cors({
-    origin: "https://tcc-fixandopc.vercel.app", // teu domínio do front hospedado
-    credentials: true, // permite cookies e headers de autenticação
+    origin: "https://tcc-fixandopc.vercel.app",
+    credentials: true,
   })
 );
-app.use(express.json());
+
 
 
 // Rotas específicas
