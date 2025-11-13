@@ -12,13 +12,11 @@ dotenv.config();
 const app = express();
 
 // Middlewares globais
-app.use(express.json());
-app.use(
-  cors({
-    origin: "https://tcc-fixandopc.vercel.app",
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: ['https://tcc-fixandopc.vercel.app'], // domínio do front hospedado
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true,
+}));
 
 
 
