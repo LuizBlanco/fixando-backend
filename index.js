@@ -8,6 +8,9 @@ const routes = require('./src');
 const commentRoutes = require('./src/routes/comments');
 const likesRoutes = require('./src/routes/likes');
 
+// Middleware de autenticação
+const authenticate = require('./src/middlewares/authenticate');
+
 dotenv.config();
 
 const app = express();
@@ -19,20 +22,22 @@ app.use(express.urlencoded({ extended: true }));
 // ========= CORS =========
 app.use(
   cors({
-    origin: "https://tcc-fixandopc-a.vercel.app",
+    origin: "https://tcc-fixandopc-a.vercel.app", // Domínio do front
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
+    credentials: true, // importante para cookies e auth headers
   })
 );
 
 // Rotas estáticas
 app.use('/uploads', express.static('uploads'));
 
-// Rotas específicas
-app.use('/api/posts', commentRoutes);
+// Rotas que precisam de autenticação
+app.use('/api/posts', authenticate, commentRoutes); // posts e comentários
+app.use('/likes', authenticate, likesRoutes);
+
+// Rotas públicas ou gerais
 app.use('/api', routes);
-app.use('/likes', likesRoutes);
 
 // Swagger
 setupSwagger(app);
