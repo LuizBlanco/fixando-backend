@@ -11,15 +11,23 @@ dotenv.config();
 
 const app = express();
 
-// Middlewares globais
+// ========== CORS CONFIG ==========
 app.use(
   cors({
-    origin: "https://tcc-fixandopc.vercel.app", // domínio do seu front hospedado
+    origin: "https://tcc-fixandopc.vercel.app", // domínio do front-end
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
   })
 );
-app.options('*', cors());
+app.options("*", cors()); // libera preflight para todos os endpoints
+
+// ========== MIDDLEWARES ==========
+app.use(express.json());
+app.use('/uploads', express.static('uploads'));
+
+
+
 
 
 
