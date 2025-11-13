@@ -15,7 +15,7 @@ const app = express();
 // ========== CORS CONFIG ==========
 app.use(
   cors({
-    origin: "https://tcc-fixandopc.vercel.app", // domínio do front-end
+    origin: "https://tcc-fixandopc-a.vercel.app/", // domínio do front-end
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
