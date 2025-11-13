@@ -19,7 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 // ========= CORS =========
 app.use(
   cors({
-    origin: "https://tcc-fixandopc.vercel.app",
+    origin: "https://tcc-fixandopc-a.vercel.app",
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
