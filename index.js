@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 const { setupSwagger } = require('./src/swagger');
 
 // Rotas
-const routes = require('./src');
+const routes = require('./src'); // auth, posts etc.
 const commentRoutes = require('./src/routes/comments');
 const likesRoutes = require('./src/routes/likes');
 
@@ -22,22 +22,28 @@ app.use(express.urlencoded({ extended: true }));
 // ========= CORS =========
 app.use(
   cors({
-    origin: "https://tcc-fixandopc-a.vercel.app", // Domínio do front
+    origin: "https://tcc-fixandopc-a.vercel.app",
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true, // importante para cookies e auth headers
+    credentials: true,
   })
 );
 
-// Rotas estáticas
+// Arquivos estáticos
 app.use('/uploads', express.static('uploads'));
 
-// Rotas que precisam de autenticação
-app.use('/api/posts', authenticate, commentRoutes); // posts e comentários
-app.use('/likes', authenticate, likesRoutes);
 
-// Rotas públicas ou gerais
+// =========================
+// ROTAS ORGANIZADAS CERTINHO
+// =========================
+
+// Rotas públicas (login, register, get posts sem token)
 app.use('/api', routes);
+
+// Rotas protegidas (precisam de token)
+app.use('/api/comments', authenticate, commentRoutes);
+app.use('/api/likes', authenticate, likesRoutes);
+
 
 // Swagger
 setupSwagger(app);
@@ -50,4 +56,6 @@ app.use((err, req, res, next) => {
 
 // Inicializa servidor
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
+app.listen(PORT, () =>
+  console.log(`Servidor rodando na porta ${PORT}`)
+);
