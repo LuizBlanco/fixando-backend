@@ -22,14 +22,13 @@ app.use(express.urlencoded({ extended: true }));
 const allowedOrigins = [
   "https://tcc-fixandopc.vercel.app",
   "https://tcc-fixandopc-a.vercel.app",
-  "http://localhost:5173",
+  "http://localhost:5173"
 ];
 
 app.use(
   cors({
     origin: allowedOrigins,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );
@@ -37,7 +36,7 @@ app.use(
 // Rotas estáticas
 app.use('/uploads', express.static('uploads'));
 
-// Rotas que precisam estar autenticadas
+// Rotas autenticadas
 app.use('/api/posts', authenticate, commentRoutes);
 app.use('/likes', authenticate, likesRoutes);
 
